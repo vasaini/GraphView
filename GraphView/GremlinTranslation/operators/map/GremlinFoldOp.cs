@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace GraphView
 {
-    internal class GremlinInVOp: GremlinTranslationOperator
+    internal class GremlinFoldOp: GremlinTranslationOperator
     {
-        public GremlinInVOp() { }
+        public GremlinFoldOp() {}
 
         internal override GremlinToSqlContext GetContext()
         {
@@ -18,7 +18,7 @@ namespace GraphView
                 throw new QueryCompilationException("The PivotVariable can't be null.");
             }
 
-            inputContext.PivotVariable.InV(inputContext);
+            inputContext.PivotVariable.Fold(inputContext);
 
             return inputContext;
         }

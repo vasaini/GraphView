@@ -154,7 +154,7 @@ namespace GraphView
         }
     }
 
-    public abstract partial class WPrimaryExpression : WScalarExpression { }
+    public abstract partial class WPrimaryExpression : WScalarExpression {}
 
     public partial class WEdgeColumnReferenceExpression : WColumnReferenceExpression
     {
@@ -221,7 +221,7 @@ namespace GraphView
         internal ColumnType ColumnType { get; set; }
         internal ColumnGraphType ColumnGraphType { get; set; }
 
-        public WColumnReferenceExpression() { }
+        public WColumnReferenceExpression() {}
 
         public WColumnReferenceExpression(string tableName, string columnName)
         {
@@ -470,7 +470,7 @@ namespace GraphView
             Value = value;
             SingleQuoted = quoted;
         }
-        public WValueExpression() { }
+        public WValueExpression() {}
 
         internal override bool OneLine()
         {

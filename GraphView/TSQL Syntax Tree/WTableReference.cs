@@ -403,7 +403,7 @@ namespace GraphView
         public bool IsList { get; set; }
     }
 
-    public partial class WDecomposeTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WDecomposeTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WFlatMapTableReference : WSchemaObjectFunctionTableReference {}
 
@@ -411,13 +411,13 @@ namespace GraphView
 
     public partial class WLocalTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WBoundNodeTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WBoundNodeTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WPropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WAllPropertiesTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WAllPropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WAllValuesTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WAllValuesTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WPathTableReference : WSchemaObjectFunctionTableReference
     {
@@ -516,7 +516,7 @@ namespace GraphView
 
     public partial class WSampleGlobalTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WSampleLocalTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WSampleLocalTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WValuesTableReference : WSchemaObjectFunctionTableReference {}
 
@@ -541,35 +541,35 @@ namespace GraphView
 
     public partial class WTreeTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WValueMapTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WValueMapTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WPropertyMapTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WPropertyMapTableReference : WSchemaObjectFunctionTableReference {}
 
     public abstract partial class WEdgeToVertexTableReference : WSchemaObjectFunctionTableReference
     {
         internal abstract TraversalOperator2.TraversalTypeEnum GetTraversalTypeParameter();
     }
 
-    public partial class WEdgeToSourceVertexTableReference : WEdgeToVertexTableReference { }
+    public partial class WEdgeToSourceVertexTableReference : WEdgeToVertexTableReference {}
 
-    public partial class WEdgeToSinkVertexTableReference : WEdgeToVertexTableReference { }
+    public partial class WEdgeToSinkVertexTableReference : WEdgeToVertexTableReference {}
 
-    public partial class WEdgeToOtherVertexTableReference : WEdgeToVertexTableReference { }
+    public partial class WEdgeToOtherVertexTableReference : WEdgeToVertexTableReference {}
 
-    public partial class WEdgeToBothVertexTableReference : WEdgeToVertexTableReference { }
+    public partial class WEdgeToBothVertexTableReference : WEdgeToVertexTableReference {}
 
     public abstract partial class WVertexToEdgeTableReference : WSchemaObjectFunctionTableReference
     {
         internal abstract Tuple<bool, bool> GetAdjListDecoderCrossApplyTypeParameter();
     }
 
-    public partial class WVertexToForwardEdgeTableReference : WVertexToEdgeTableReference { }
+    public partial class WVertexToForwardEdgeTableReference : WVertexToEdgeTableReference {}
 
-    public partial class WVertexToBackwordEdgeTableReference : WVertexToEdgeTableReference { }
+    public partial class WVertexToBackwordEdgeTableReference : WVertexToEdgeTableReference {}
 
-    public partial class WVertexToBothEdgeTableReference : WVertexToEdgeTableReference { }
+    public partial class WVertexToBothEdgeTableReference : WVertexToEdgeTableReference {}
 
-    public partial class WChooseTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WChooseTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WChooseWithOptionsTableReference : WSchemaObjectFunctionTableReference
     {
@@ -672,9 +672,9 @@ namespace GraphView
         }
     }
 
-    public partial class WAddVTableReference2 : WSchemaObjectFunctionTableReference { }
+    public partial class WAddVTableReference2 : WSchemaObjectFunctionTableReference {}
 
-    //public partial class WAddVTableReference : WSchemaObjectFunctionTableReference { }
+    //public partial class WAddVTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WSideEffectTableReference : WSchemaObjectFunctionTableReference {}
 
@@ -682,21 +682,21 @@ namespace GraphView
 
     public partial class WDedupLocalTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WDropTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WDropTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WDropNodeTableReference : WSchemaObjectFunctionTableReference {}
 
     //public partial class WDropEdgeTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WDropTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WDropTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WDropPropertiesTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WDropPropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
     //public partial class WUpdateVertexPropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WUpdateMetaPropertiesTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WUpdateMetaPropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WUpdatePropertiesTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WUpdatePropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
     //public partial class WUpdateEdgePropertiesTableReference : WSchemaObjectFunctionTableReference {}
 
@@ -742,7 +742,7 @@ namespace GraphView
 
     public partial class WLabelTableReference : WSchemaObjectFunctionTableReference {}
 
-    public partial class WFilterTableReference : WSchemaObjectFunctionTableReference { }
+    public partial class WFilterTableReference : WSchemaObjectFunctionTableReference {}
 
     public partial class WJoinParenthesisTableReference : WTableReference
     {

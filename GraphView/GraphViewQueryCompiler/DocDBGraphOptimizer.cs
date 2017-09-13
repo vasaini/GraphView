@@ -7,7 +7,7 @@ namespace GraphView
     public class DocDbGraphOptimizer : GraphOptimizer
     {
         public DocDbGraphOptimizer(MatchGraph graph) : base(graph)
-        { }
+        {}
 
         public override List<Tuple<MatchNode, MatchEdge, List<MatchEdge>, List<MatchEdge>, List<MatchEdge>>> GetOptimizedTraversalOrder(ConnectedComponent subGraph)
         {

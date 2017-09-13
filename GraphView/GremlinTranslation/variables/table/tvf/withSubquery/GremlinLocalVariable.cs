@@ -13,25 +13,38 @@ namespace GraphView
         public GremlinLocalVariable(GremlinToSqlContext localContext, GremlinVariableType variableType)
             : base(variableType)
         {
-            LocalContext = localContext;
+            this.LocalContext = localContext;
         }
 
-        internal override void Populate(string property)
+        internal override bool Populate(string property, string label = null)
         {
-            base.Populate(property);
-            LocalContext.Populate(property);
+            if (this.LocalContext.Populate(property, label))
+            {
+                return base.Populate(property, null);
+            }
+            else if (base.Populate(property, label))
+            {
+                return LocalContext.Populate(property, null);
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        internal override void PopulateStepProperty(string property)
+        internal override bool PopulateStepProperty(string property, string label)
         {
-            LocalContext.ContextLocalPath.PopulateStepProperty(property);
+            return this.LocalContext.ContextLocalPath.PopulateStepProperty(property, label);
         }
 
         internal override void PopulateLocalPath()
         {
-            if (ProjectedProperties.Contains(GremlinKeyword.Path)) return;
+            if (ProjectedProperties.Contains(GremlinKeyword.Path))
+            {
+                return;
+            }
             ProjectedProperties.Add(GremlinKeyword.Path);
-            LocalContext.PopulateLocalPath();
+            this.LocalContext.PopulateLocalPath();
         }
 
         internal override WScalarExpression ToStepScalarExpr()
@@ -42,21 +55,21 @@ namespace GraphView
         internal override List<GremlinVariable> FetchAllVars()
         {
             List<GremlinVariable> variableList = new List<GremlinVariable>() { this };
-            variableList.AddRange(LocalContext.FetchAllVars());
+            variableList.AddRange(this.LocalContext.FetchAllVars());
             return variableList;
         }
 
         internal override List<GremlinTableVariable> FetchAllTableVars()
         {
             List<GremlinTableVariable> variableList = new List<GremlinTableVariable> { this };
-            variableList.AddRange(LocalContext.FetchAllTableVars());
+            variableList.AddRange(this.LocalContext.FetchAllTableVars());
             return variableList;
         }
 
         public override WTableReference ToTableReference()
         {
             List<WScalarExpression> parameters = new List<WScalarExpression>();
-            parameters.Add(SqlUtil.GetScalarSubquery(LocalContext.ToSelectQueryBlock()));
+            parameters.Add(SqlUtil.GetScalarSubquery(this.LocalContext.ToSelectQueryBlock()));
             var tableRef = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Local, parameters, GetVariableName());
 
             return SqlUtil.GetCrossApplyTableReference(tableRef);

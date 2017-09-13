@@ -27,7 +27,7 @@ namespace GraphView
         public virtual FieldObject this[string index]
         {
             get { return (FieldObject) null; }
-            set { }
+            set {}
         }
 
         public static string ToLiteral(string inputString)

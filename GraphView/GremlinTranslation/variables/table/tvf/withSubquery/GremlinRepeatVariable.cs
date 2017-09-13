@@ -27,22 +27,38 @@ namespace GraphView
             this.Count = 0;
         }
 
-        internal override void Populate(string property)
+        internal override bool Populate(string property, string label = null)
         {
-            base.Populate(property);
-
-            this.InputVariable.Populate(property);
-            this.RepeatContext.Populate(property);
+            if (base.Populate(property, label))
+            {
+                this.InputVariable.Populate(property, null);
+                this.RepeatContext.Populate(property, null);
+                return true;
+            }
+            else
+            {
+                bool populateSuccess = false;
+                populateSuccess |= this.InputVariable.Populate(property, label);
+                populateSuccess |= this.RepeatContext.Populate(property, label);
+                if (populateSuccess)
+                {
+                    base.Populate(property, label);
+                }
+                return populateSuccess;
+            }
         }
 
-        internal override void PopulateStepProperty(string property)
+        internal override bool PopulateStepProperty(string property, string label)
         {
-            this.RepeatContext.ContextLocalPath.PopulateStepProperty(property);
+            return this.RepeatContext.ContextLocalPath.PopulateStepProperty(property, label);
         }
 
         internal override void PopulateLocalPath()
         {
-            if (this.ProjectedProperties.Contains(GremlinKeyword.Path)) return;
+            if (this.ProjectedProperties.Contains(GremlinKeyword.Path))
+            {
+                return;
+            }
             this.ProjectedProperties.Add(GremlinKeyword.Path);
             this.RepeatContext.PopulateLocalPath();
         }
@@ -111,7 +127,7 @@ namespace GraphView
             WSelectQueryBlock repeatQueryBlock = this.RepeatContext.ToSelectQueryBlock();
 
             GremlinVariable repeatInputVariable = this.RepeatContext.VariableList.First();
-            GremlinVariable realInputVariable = InputVariable.RealVariable;
+            GremlinVariable realInputVariable = this.InputVariable.RealVariable;
             GremlinVariable repeatPivotVariable = this.RepeatContext.PivotVariable;
             
             foreach (string property in repeatInputVariable.ProjectedProperties)
@@ -232,11 +248,11 @@ namespace GraphView
     
     internal class ModifyRepeatInputVariablesVisitor : WSqlFragmentVisitor
     {
-        private Dictionary<Tuple<string, string>, Tuple<string, string>> map;
+        private Dictionary<Tuple<string, string>, Tuple<string, string>> Map;
 
         public void Invoke(WSqlFragment queryBlock, Dictionary<Tuple<string, string>, Tuple<string, string>> map)
         {
-            this.map = map;
+            this.Map = map;
             queryBlock.Accept(this);
         }
 
@@ -256,7 +272,7 @@ namespace GraphView
         {
             string key = columnReference.TableReference;
             string value = columnReference.ColumnName;
-            foreach (KeyValuePair<Tuple<string, string>, Tuple<string, string>> item in this.map)
+            foreach (KeyValuePair<Tuple<string, string>, Tuple<string, string>> item in this.Map)
             {
                 if (item.Key.Item1.Equals(key) && item.Key.Item2.Equals(value))
                 {

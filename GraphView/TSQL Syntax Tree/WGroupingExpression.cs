@@ -37,7 +37,7 @@ namespace GraphView
         NotSpecified,
     }
 
-    public abstract partial class WGroupingSpecification : WSqlFragment { }
+    public abstract partial class WGroupingSpecification : WSqlFragment {}
 
     public partial class WCompositeGroupingSpec : WGroupingSpecification
     {

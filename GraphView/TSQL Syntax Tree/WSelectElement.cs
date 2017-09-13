@@ -48,7 +48,7 @@ namespace GraphView
     /// 2) star expressions.
     /// 3) local/global variables
     /// </summary>
-    public abstract partial class WSelectElement : WSqlFragment { }
+    public abstract partial class WSelectElement : WSqlFragment {}
 
     public partial class WSelectScalarExpression : WSelectElement
     {

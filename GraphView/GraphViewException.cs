@@ -32,23 +32,23 @@ namespace GraphView
     [Serializable]
     public class GraphViewException: Exception
     {
-        public GraphViewException() { }
-        public GraphViewException(string message) : base(message) { }
+        public GraphViewException() {}
+        public GraphViewException(string message) : base(message) {}
 
         public GraphViewException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected GraphViewException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected GraphViewException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 
     [Serializable]
     public class SyntaxErrorException : GraphViewException
     {
-        public SyntaxErrorException() { }
-        public SyntaxErrorException(string message) : base(message) { }
+        public SyntaxErrorException() {}
+        public SyntaxErrorException(string message) : base(message) {}
         public SyntaxErrorException(string message, Exception innerException) :
-            base(message, innerException) { }
-        protected SyntaxErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+            base(message, innerException) {}
+        protected SyntaxErrorException(SerializationInfo info, StreamingContext context) : base(info, context) {}
 
         public SyntaxErrorException(int line, string key, string mes)
             : base("\nLine " + line + ":\n" + "Incorrect syntax near " + key + ": " + mes + "\n")
@@ -64,88 +64,88 @@ namespace GraphView
     [Serializable]
     public class TranslationException : GraphViewException
     {
-        public TranslationException() { }
-        public TranslationException(string message) : base(message) { }
+        public TranslationException() {}
+        public TranslationException(string message) : base(message) {}
         public TranslationException(string message, Exception innerException) :
             base(message, innerException)
-        { }
+        {}
     }
 
     [Serializable]
     public class QueryCompilationException : GraphViewException
     {
-        public QueryCompilationException() { }
-        public QueryCompilationException(string message) : base(message) { }
+        public QueryCompilationException() {}
+        public QueryCompilationException(string message) : base(message) {}
         public QueryCompilationException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
     }
 
     [Serializable]
     public class QueryExecutionException : GraphViewException
     {
-        public QueryExecutionException() { }
-        public QueryExecutionException(string message) : base(message) { }
+        public QueryExecutionException() {}
+        public QueryExecutionException(string message) : base(message) {}
         public QueryExecutionException(string message, Exception innerException)
-            : base (message, innerException) { }
+            : base (message, innerException) {}
     }
 
     [Serializable]
     public class SqlExecutionException : GraphViewException
     {
-        public SqlExecutionException() { }
-        public SqlExecutionException(string message) : base(message) { }
+        public SqlExecutionException() {}
+        public SqlExecutionException(string message) : base(message) {}
 
         public SqlExecutionException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected SqlExecutionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected SqlExecutionException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 
     [Serializable]
     public class BulkInsertNodeException : GraphViewException
     {
-        public BulkInsertNodeException () { }
-        public BulkInsertNodeException(string message) : base(message) { }
+        public BulkInsertNodeException () {}
+        public BulkInsertNodeException(string message) : base(message) {}
 
         public BulkInsertNodeException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected BulkInsertNodeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected BulkInsertNodeException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 
     [Serializable]
     public class BulkInsertEdgeException : GraphViewException
     {
-        public BulkInsertEdgeException() { }
-        public BulkInsertEdgeException(string message) : base(message) { }
+        public BulkInsertEdgeException() {}
+        public BulkInsertEdgeException(string message) : base(message) {}
 
         public BulkInsertEdgeException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected BulkInsertEdgeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected BulkInsertEdgeException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 
     [Serializable]
     public class EdgeViewException : GraphViewException
     {
-        public EdgeViewException() { }
-        public EdgeViewException(string message) : base(message) { }
+        public EdgeViewException() {}
+        public EdgeViewException(string message) : base(message) {}
 
         public EdgeViewException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected EdgeViewException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected EdgeViewException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 
     [Serializable]
     public class NodeViewException : GraphViewException
     {
-        public NodeViewException() { }
-        public NodeViewException(string message) : base(message) { }
+        public NodeViewException() {}
+        public NodeViewException(string message) : base(message) {}
 
         public NodeViewException(string message, Exception innerException) :
-            base(message, innerException) { }
+            base(message, innerException) {}
 
-        protected NodeViewException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected NodeViewException(SerializationInfo info, StreamingContext context) : base(info, context) {}
     }
 }

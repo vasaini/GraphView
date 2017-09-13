@@ -359,7 +359,7 @@ namespace GraphView
         }
     }
 
-    public abstract partial class WSetClause : WSqlFragment { }
+    public abstract partial class WSetClause : WSqlFragment {}
 
     public partial class WFunctionCallSetClause : WSetClause
     {

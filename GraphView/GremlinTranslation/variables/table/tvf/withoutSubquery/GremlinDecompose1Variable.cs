@@ -12,26 +12,31 @@ namespace GraphView
 
         public GremlinDecompose1Variable(GremlinVariable composeVariable) : base(GremlinVariableType.Table)
         {
-            ComposeVariable = composeVariable;
+            this.ComposeVariable = composeVariable;
         }
 
-        internal override void Populate(string property)
+        internal override bool Populate(string property, string label = null)
         {
-            if (ComposeVariable is GremlinPathVariable && property != GremlinKeyword.TableDefaultColumnName)
-                ComposeVariable.PopulateStepProperty(property);
+            if (this.ComposeVariable is GremlinPathVariable && property != GremlinKeyword.TableDefaultColumnName)
+            {
+                this.ComposeVariable.PopulateStepProperty(property, label);
+                base.Populate(property, null);
+            }
             else
-                ComposeVariable.Populate(property);
-            base.Populate(property);
+            {
+                this.ComposeVariable.Populate(property, label);
+                base.Populate(property, null);
+            }
+            return true;
         }
 
         public override WTableReference ToTableReference()
         {
             List<WScalarExpression> parameters = new List<WScalarExpression>();
             parameters.Add(SqlUtil.GetColumnReferenceExpr(GremlinKeyword.Compose1TableDefaultName, GremlinKeyword.TableDefaultColumnName));
-            foreach (var projectProperty in ProjectedProperties)
-            {
-                parameters.Add(SqlUtil.GetValueExpr(projectProperty));
-            }
+            parameters.Add(SqlUtil.GetValueExpr(this.DefaultProperty()));
+            parameters.AddRange(this.ProjectedProperties.Select(SqlUtil.GetValueExpr));
+
             var tableRef = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Decompose1, parameters, GetVariableName());
             return SqlUtil.GetCrossApplyTableReference(tableRef);
         }

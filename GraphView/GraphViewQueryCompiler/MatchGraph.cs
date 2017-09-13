@@ -171,7 +171,7 @@ namespace GraphView
             return NodeAlias.GetHashCode();
         }
 
-        public MatchNode() { }
+        public MatchNode() {}
 
         public MatchNode(MatchNode rhs)
         {

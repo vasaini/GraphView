@@ -17,7 +17,7 @@ namespace GraphView.GraphViewDBPortal
     {
         public GraphViewConnection Connection { get; protected set; }
 
-        public void Dispose() { }
+        public void Dispose() {}
 
         public IEnumerator<Tuple<VertexField, RawRecord>> GetVerticesAndEdgesViaVertices(JsonQuery vertexQuery,
             GraphViewCommand command)

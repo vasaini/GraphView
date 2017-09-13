@@ -1171,7 +1171,7 @@ namespace GraphView
         private RawRecord firstRecordInGroup = null;
 
         internal ProjectAggregationInBatch(GraphViewExecutionOperator inputOp) : base(inputOp)
-        { }
+        {}
 
         public RawRecord GetNoAccumulateRecord(int index)
         {
@@ -2403,7 +2403,7 @@ namespace GraphView
             GraphViewExecutionOperator inputOp,
             int startIndex,
             int count)
-            : base(inputOp, startIndex, count) { }
+            : base(inputOp, startIndex, count) {}
 
         public override RawRecord Next()
         {
@@ -2644,7 +2644,7 @@ namespace GraphView
         internal TailInBatchOperator(
             GraphViewExecutionOperator inputOp,
             int lastN)
-            : base(inputOp, lastN) { }
+            : base(inputOp, lastN) {}
 
         public override RawRecord Next()
         {
@@ -4276,7 +4276,7 @@ namespace GraphView
             GraphViewExecutionOperator inputOp,
             long amountToSample,
             ScalarFunction byFunction)
-            : base(inputOp, amountToSample, byFunction) { }
+            : base(inputOp, amountToSample, byFunction) {}
 
         public override RawRecord Next()
         {

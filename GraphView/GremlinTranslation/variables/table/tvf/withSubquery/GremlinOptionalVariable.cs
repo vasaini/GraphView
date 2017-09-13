@@ -17,28 +17,41 @@ namespace GraphView
             : base(variableType)
         {
             inputVariable.ProjectedProperties.Clear();
-            OptionalContext = context;
-            InputVariable = new GremlinContextVariable(inputVariable);
+            this.OptionalContext = context;
+            this.InputVariable = new GremlinContextVariable(inputVariable);
         }
 
-        internal override void PopulateStepProperty(string property)
+        internal override bool PopulateStepProperty(string property, string label)
         {
-            OptionalContext.ContextLocalPath.PopulateStepProperty(property);
+            return this.OptionalContext.ContextLocalPath.PopulateStepProperty(property, label);
         }
 
         internal override void PopulateLocalPath()
         {
-            if (ProjectedProperties.Contains(GremlinKeyword.Path)) return;
+            if (ProjectedProperties.Contains(GremlinKeyword.Path))
+            {
+                return;
+            }
             ProjectedProperties.Add(GremlinKeyword.Path);
-            OptionalContext.PopulateLocalPath();
+            this.OptionalContext.PopulateLocalPath();
         }
 
-        internal override void Populate(string property)
+        internal override bool Populate(string property, string label = null)
         {
-            base.Populate(property);
-
-            InputVariable.Populate(property);
-            OptionalContext.Populate(property);
+            if (base.Populate(property, label))
+            {
+                this.InputVariable.Populate(property, null);
+                this.OptionalContext.Populate(property, null);
+                return true;
+            }
+            bool populateSuccess = false;
+            populateSuccess |= this.InputVariable.Populate(property, label);
+            populateSuccess |= this.OptionalContext.Populate(property, label);
+            if (populateSuccess)
+            {
+                base.Populate(property, label);
+            }
+            return populateSuccess;
         }
 
         internal override WScalarExpression ToStepScalarExpr()
@@ -49,15 +62,15 @@ namespace GraphView
         internal override List<GremlinVariable> FetchAllVars()
         {
             List<GremlinVariable> variableList = new List<GremlinVariable>() { this };
-            variableList.Add(InputVariable);
-            variableList.AddRange(OptionalContext.FetchAllVars());
+            variableList.Add(this.InputVariable);
+            variableList.AddRange(this.OptionalContext.FetchAllVars());
             return variableList;
         }
 
         internal override List<GremlinTableVariable> FetchAllTableVars()
         {
             List<GremlinTableVariable> variableList = new List<GremlinTableVariable> { this };
-            variableList.AddRange(OptionalContext.FetchAllTableVars());
+            variableList.AddRange(this.OptionalContext.FetchAllTableVars());
             return variableList;
         }
 
@@ -69,14 +82,14 @@ namespace GraphView
             {
                 if (projectProperty == GremlinKeyword.TableDefaultColumnName)
                 {
-                    firstQueryExpr.SelectElements.Add(SqlUtil.GetSelectScalarExpr(InputVariable.DefaultProjection().ToScalarExpression(),
+                    firstQueryExpr.SelectElements.Add(SqlUtil.GetSelectScalarExpr(this.InputVariable.DefaultProjection().ToScalarExpression(),
                         GremlinKeyword.TableDefaultColumnName));
                 }
-                else if (InputVariable.RealVariable.ProjectedProperties.Contains(projectProperty))
+                else if (this.InputVariable.RealVariable.ProjectedProperties.Contains(projectProperty))
                 {
                     firstQueryExpr.SelectElements.Add(
                         SqlUtil.GetSelectScalarExpr(
-                            InputVariable.RealVariable.GetVariableProperty(projectProperty).ToScalarExpression(), projectProperty));
+                            this.InputVariable.RealVariable.GetVariableProperty(projectProperty).ToScalarExpression(), projectProperty));
                 }
                 else
                 {
@@ -85,7 +98,7 @@ namespace GraphView
                 }
             }
 
-            WSelectQueryBlock secondQueryExpr = OptionalContext.ToSelectQueryBlock();
+            WSelectQueryBlock secondQueryExpr = this.OptionalContext.ToSelectQueryBlock();
 
             var WBinaryQueryExpression = SqlUtil.GetBinaryQueryExpr(firstQueryExpr, secondQueryExpr);
 

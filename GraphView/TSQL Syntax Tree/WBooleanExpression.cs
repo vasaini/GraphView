@@ -60,7 +60,7 @@ namespace GraphView
         None
     }
 
-    public abstract partial class WBooleanExpression : WSqlFragment { }
+    public abstract partial class WBooleanExpression : WSqlFragment {}
 
     public partial class WBooleanBinaryExpression : WBooleanExpression
     {

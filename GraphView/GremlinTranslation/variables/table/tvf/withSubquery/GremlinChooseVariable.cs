@@ -8,7 +8,7 @@ namespace GraphView
 {
     internal class GremlinChooseVariable : GremlinTableVariable
     {
-        public GremlinToSqlContext PredicateContext { get; set; }
+        public GremlinToSqlContext ProjectContext { get; set; }
         public GremlinToSqlContext TrueChoiceContext { get; set; }
         public GremlinToSqlContext FalseChocieContext { get; set; }
         public GremlinToSqlContext ChoiceContext { get; set; }
@@ -17,45 +17,72 @@ namespace GraphView
         public GremlinChooseVariable(GremlinToSqlContext predicateContext, GremlinToSqlContext trueChoiceContext, GremlinToSqlContext falseChocieContext)
             : base(GremlinVariableType.Table)
         {
-            PredicateContext = predicateContext;
-            TrueChoiceContext = trueChoiceContext;
-            FalseChocieContext = falseChocieContext;
-            Options = new Dictionary<object, GremlinToSqlContext>();
+            this.ProjectContext = predicateContext;
+            this.TrueChoiceContext = trueChoiceContext;
+            this.FalseChocieContext = falseChocieContext;
+            this.Options = new Dictionary<object, GremlinToSqlContext>();
         }
 
         public GremlinChooseVariable(GremlinToSqlContext choiceContext, Dictionary<object, GremlinToSqlContext> options)
             : base(GremlinVariableType.Table)
         {
-            ChoiceContext = choiceContext;
-            Options = options;
+            this.ChoiceContext = choiceContext;
+            this.Options = options;
         }
 
-        internal override void Populate(string property)
+        internal override bool Populate(string property, string label = null)
         {
-            base.Populate(property);
-
-            TrueChoiceContext?.Populate(property);
-            FalseChocieContext?.Populate(property);
-
-            foreach (var option in Options)
+            bool populateSuccess = false;
+            if (base.Populate(property, label))
             {
-                option.Value.Populate(property);
+                this.TrueChoiceContext?.Populate(property, null);
+                this.FalseChocieContext?.Populate(property, null);
+                foreach (var option in this.Options)
+                {
+                    option.Value.Populate(property, null);
+                }
+                populateSuccess = true;
             }
+            else if (this.ProjectContext != null)
+            {
+                if (this.TrueChoiceContext.Populate(property, label))
+                {
+                    this.FalseChocieContext.Populate(property, null);
+                    populateSuccess = base.Populate(property, null);
+                }
+                else if (this.FalseChocieContext.Populate(property, label))
+                {
+                    this.TrueChoiceContext.Populate(property, null);
+                    populateSuccess = base.Populate(property, null);
+                }
+            }
+            else
+            {
+                foreach (var option in this.Options)
+                {
+                    populateSuccess |= option.Value.Populate(property, label);
+                }
+                if (populateSuccess)
+                {
+                    base.Populate(property, null);
+                }
+            }
+            return populateSuccess;
         }
 
         internal override List<GremlinVariable> FetchAllVars()
         {
             List<GremlinVariable> variableList = new List<GremlinVariable>() { this };
-            if (PredicateContext != null)
+            if (this.ProjectContext != null)
             {
-                variableList.AddRange(PredicateContext.FetchAllVars());
-                variableList.AddRange(TrueChoiceContext.FetchAllVars());
-                variableList.AddRange(FalseChocieContext.FetchAllVars());
+                variableList.AddRange(this.ProjectContext.FetchAllVars());
+                variableList.AddRange(this.TrueChoiceContext.FetchAllVars());
+                variableList.AddRange(this.FalseChocieContext.FetchAllVars());
             }
             else
             {
-                variableList.AddRange(ChoiceContext.FetchAllVars());
-                foreach (var option in Options)
+                variableList.AddRange(this.ChoiceContext.FetchAllVars());
+                foreach (var option in this.Options)
                 {
                     variableList.AddRange(option.Value.FetchAllVars());
                 }
@@ -66,16 +93,16 @@ namespace GraphView
         internal override List<GremlinTableVariable> FetchAllTableVars()
         {
             List<GremlinTableVariable> variableList = new List<GremlinTableVariable> { this };
-            if (PredicateContext != null)
+            if (this.ProjectContext != null)
             {
-                variableList.AddRange(PredicateContext.FetchAllTableVars());
-                variableList.AddRange(TrueChoiceContext.FetchAllTableVars());
-                variableList.AddRange(FalseChocieContext.FetchAllTableVars());
+                variableList.AddRange(this.ProjectContext.FetchAllTableVars());
+                variableList.AddRange(this.TrueChoiceContext.FetchAllTableVars());
+                variableList.AddRange(this.FalseChocieContext.FetchAllTableVars());
             }
             else
             {
-                variableList.AddRange(ChoiceContext.FetchAllTableVars());
-                foreach (var option in Options)
+                variableList.AddRange(this.ChoiceContext.FetchAllTableVars());
+                foreach (var option in this.Options)
                 {
                     variableList.AddRange(option.Value.FetchAllTableVars());
                 }
@@ -83,34 +110,49 @@ namespace GraphView
             return variableList;
         }
 
-        internal override void PopulateStepProperty(string property)
+        internal override bool PopulateStepProperty(string property, string label)
         {
-            if (PredicateContext != null)
+            bool populateSuccess = false;
+            if (base.Populate(property, label))
             {
-                TrueChoiceContext.ContextLocalPath.PopulateStepProperty(property);
-                FalseChocieContext.ContextLocalPath.PopulateStepProperty(property);
+                this.TrueChoiceContext?.ContextLocalPath.PopulateStepProperty(property, null);
+                this.FalseChocieContext?.ContextLocalPath.PopulateStepProperty(property, null);
+                foreach (var option in this.Options)
+                {
+                    option.Value.ContextLocalPath.PopulateStepProperty(property, null);
+                }
+                populateSuccess = true;
+            }
+            else if (this.ProjectContext != null)
+            {
+                populateSuccess |= this.TrueChoiceContext.ContextLocalPath.PopulateStepProperty(property, label);
+                populateSuccess |= this.FalseChocieContext.ContextLocalPath.PopulateStepProperty(property, label);
             }
             else
             {
-                foreach (var option in Options)
+                foreach (var option in this.Options)
                 {
-                    option.Value.ContextLocalPath.PopulateStepProperty(property);
+                    populateSuccess |= option.Value.ContextLocalPath.PopulateStepProperty(property, label);
                 }
             }
+            return populateSuccess;
         }
 
         internal override void PopulateLocalPath()
         {
-            if (ProjectedProperties.Contains(GremlinKeyword.Path)) return;
-            ProjectedProperties.Add(GremlinKeyword.Path);
-            if (PredicateContext != null)
+            if (ProjectedProperties.Contains(GremlinKeyword.Path))
             {
-                TrueChoiceContext.PopulateLocalPath();
-                FalseChocieContext.PopulateLocalPath();
+                return;
+            }
+            ProjectedProperties.Add(GremlinKeyword.Path);
+            if (this.ProjectContext != null)
+            {
+                this.TrueChoiceContext.PopulateLocalPath();
+                this.FalseChocieContext.PopulateLocalPath();
             }
             else
             {
-                foreach (var option in Options)
+                foreach (var option in this.Options)
                 {
                     option.Value.PopulateLocalPath();
                 }
@@ -127,28 +169,30 @@ namespace GraphView
             List<WScalarExpression> parameters = new List<WScalarExpression>();
             WTableReference tableReference;
 
-            if (PredicateContext != null)
+            if (this.ProjectContext != null)
             {
-                parameters.Add(SqlUtil.GetScalarSubquery(PredicateContext.ToSelectQueryBlock()));
-                parameters.Add(SqlUtil.GetScalarSubquery(TrueChoiceContext.ToSelectQueryBlock()));
-                parameters.Add(SqlUtil.GetScalarSubquery(FalseChocieContext.ToSelectQueryBlock()));
+                parameters.Add(SqlUtil.GetScalarSubquery(this.ProjectContext.ToSelectQueryBlock()));
+                parameters.Add(SqlUtil.GetScalarSubquery(this.TrueChoiceContext.ToSelectQueryBlock()));
+                parameters.Add(SqlUtil.GetScalarSubquery(this.FalseChocieContext.ToSelectQueryBlock()));
                 tableReference = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Choose, parameters, GetVariableName());
             }
             else
             {
-                parameters.Add(SqlUtil.GetScalarSubquery(ChoiceContext.ToSelectQueryBlock()));
-                foreach (var option in Options)
+                parameters.Add(SqlUtil.GetScalarSubquery(this.ChoiceContext.ToSelectQueryBlock()));
+                foreach (var option in this.Options)
                 {
-                    if (option.Key is GremlinKeyword.Pick  && (GremlinKeyword.Pick)option.Key == GremlinKeyword.Pick.None)
+                    if (option.Key is GremlinKeyword.Pick && (GremlinKeyword.Pick) option.Key == GremlinKeyword.Pick.None)
+                    {
                         parameters.Add(SqlUtil.GetValueExpr(null));
+                    }
                     else
+                    {
                         parameters.Add(SqlUtil.GetValueExpr(option.Key));
-
+                    }
                     parameters.Add(SqlUtil.GetScalarSubquery(option.Value.ToSelectQueryBlock()));
                 }
                 tableReference = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.ChooseWithOptions, parameters, GetVariableName());
             }
-
             return SqlUtil.GetCrossApplyTableReference(tableReference);
         }
     }

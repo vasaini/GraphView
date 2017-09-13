@@ -64,8 +64,12 @@ namespace GraphViewUnitTest.Gremlin.ProcessTests
         {
             using (GraphViewCommand command = new GraphViewCommand(graphConnection))
             {
-                var traversal = command.g().V().Has("name", true).Out("created");
+                var traversal = command.g().V().Out().As("a").Path().By("name").Select("a").Unfold().In().As("b").Select("a").Unfold().Values("age");
+
+                // var traversal = command.g().V().Both().Local(GraphTraversal.__().GroupCount().By("name"));
+
                 var result = traversal.Next();
+
                 foreach (var r in result)
                 {
                     Console.WriteLine(r);

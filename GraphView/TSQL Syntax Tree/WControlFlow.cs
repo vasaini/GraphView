@@ -102,6 +102,6 @@ namespace GraphView
     {
         public WEdgeColumnReferenceExpression EdgeAlias;
 
-        public WRepeatEdgePath() { }
+        public WRepeatEdgePath() {}
     }
 }

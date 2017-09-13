@@ -221,7 +221,7 @@ namespace GraphView
         }
     }
 
-    public abstract class WFunctionReturnType : WSqlFragment { }
+    public abstract class WFunctionReturnType : WSqlFragment {}
 
     public partial class WScalarFunctionReturnType : WFunctionReturnType
     {
