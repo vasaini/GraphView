@@ -48,7 +48,7 @@ namespace GraphView
             }
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
             return this.RepeatContext.ContextLocalPath.PopulateStepProperty(property, label);
         }
@@ -116,69 +116,33 @@ namespace GraphView
             //The following two variables are used for manually creating SelectScalarExpression of repeat
             List<WSelectScalarExpression> firstSelectList = new List<WSelectScalarExpression>();
             List<WSelectScalarExpression> secondSelectList = new List<WSelectScalarExpression>();
+            WScalarExpression firstSelectColumn, secondSelectColumn, firstExpr, secondExpr;
 
             // The following map is used to replace columns of the first input to columns of the repeat input
             // such as N_0.id -> R.key_0 
+            string aliasName;
+            Tuple<string, string> key, value;
             Dictionary<Tuple<string, string>, Tuple<string, string>> inputVariableVistorMap = new Dictionary<Tuple<string, string>, Tuple<string, string>>();
-            
+
             // We should generate the syntax tree firstly
             // Some variables will populate ProjectProperty only when we call the ToTableReference function where they appear.
             WRepeatConditionExpression repeatConditionExpr = this.GetRepeatConditionExpression();
             WSelectQueryBlock repeatQueryBlock = this.RepeatContext.ToSelectQueryBlock();
 
             GremlinVariable repeatInputVariable = this.RepeatContext.VariableList.First();
+            GremlinVariable repeatOutputVariable = this.RepeatContext.PivotVariable;
             GremlinVariable realInputVariable = this.InputVariable.RealVariable;
             GremlinVariable repeatPivotVariable = this.RepeatContext.PivotVariable;
             
-            foreach (string property in repeatInputVariable.ProjectedProperties)
-            {
-                string aliasName = this.GenerateKey();
-                WScalarExpression firstSelectColumn = repeatInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
-                WScalarExpression secondSelectColumn = repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+            // this.DefaultProperty
+            key = new Tuple<string, string>(this.GetVariableName(), this.DefaultProperty());
+            value = key;
+            inputVariableVistorMap[key] = value;
 
-                firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
-                secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
-
-                Tuple<string, string> key = new Tuple<string, string>(repeatInputVariable.GetVariableName(), property);
-                Tuple<string, string> value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
-                inputVariableVistorMap[key] = value;
-            }
-
-            if (this.RepeatCondition.TerminationContext != null && this.RepeatCondition.TerminationContext.VariableList.Count > 0)
-            {
-                GremlinVariable untilInputVariable = this.RepeatCondition.TerminationContext.VariableList.First();
-                foreach (string property in untilInputVariable.ProjectedProperties)
-                {
-                    string aliasName = this.GenerateKey();
-                    WScalarExpression firstSelectColumn = untilInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
-                    WScalarExpression secondSelectColumn = repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
-
-                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
-                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
-
-                    Tuple<string, string> key = new Tuple<string, string>(untilInputVariable.GetVariableName(), property);
-                    Tuple<string, string> value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
-                    inputVariableVistorMap[key] = value;
-                }
-            }
-
-            if (this.RepeatCondition.EmitContext != null && this.RepeatCondition.EmitContext.VariableList.Count > 0)
-            {
-                GremlinVariable emitInputVariable = this.RepeatCondition.EmitContext.VariableList.First();
-                foreach (string property in emitInputVariable.ProjectedProperties)
-                {
-                    string aliasName = this.GenerateKey();
-                    WScalarExpression firstSelectColumn = emitInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
-                    WScalarExpression secondSelectColumn = repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
-
-                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
-                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
-
-                    Tuple<string, string> key = new Tuple<string, string>(emitInputVariable.GetVariableName(), property);
-                    Tuple<string, string> value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
-                    inputVariableVistorMap[key] = value;
-                }
-            }
+            firstExpr = realInputVariable.DefaultProjection().ToScalarExpression();
+            secondExpr = repeatOutputVariable.DefaultProjection().ToScalarExpression();
+            firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstExpr, this.DefaultProperty()));
+            secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondExpr, this.DefaultProperty()));
 
             foreach (string property in this.ProjectedProperties)
             {
@@ -186,18 +150,128 @@ namespace GraphView
                 {
                     firstSelectList.Add(SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), GremlinKeyword.Path));
                     secondSelectList.Add(SqlUtil.GetSelectScalarExpr(this.RepeatContext.ContextLocalPath.DefaultProjection().ToScalarExpression(), GremlinKeyword.Path));
-                    continue;
                 }
-                WScalarExpression firstExpr = realInputVariable.ProjectedProperties.Contains(property)
-                    ? realInputVariable.GetVariableProperty(property).ToScalarExpression()
-                    : SqlUtil.GetValueExpr(null);
+                else
+                {
+                    key = new Tuple<string, string>(this.GetVariableName(), property);
+                    value = key;
+                    inputVariableVistorMap[key] = value;
 
-                WScalarExpression secondExpr = this.RepeatContext.PivotVariable.ProjectedProperties.Contains(property)
-                    ? this.RepeatContext.PivotVariable.GetVariableProperty(property).ToScalarExpression()
-                    : SqlUtil.GetValueExpr(null);
+                    firstExpr = realInputVariable.ProjectedProperties.Contains(property)
+                        ? realInputVariable.GetVariableProperty(property).ToScalarExpression()
+                        : SqlUtil.GetValueExpr(null);
+                    secondExpr = repeatOutputVariable.ProjectedProperties.Contains(property)
+                        ? this.RepeatContext.PivotVariable.GetVariableProperty(property).ToScalarExpression()
+                        : SqlUtil.GetValueExpr(null);
 
-                firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstExpr, property));
-                secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondExpr, property));
+                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstExpr, property));
+                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondExpr, property));
+                }
+            }
+
+            // repeatInputVariable.DefaultProperty()
+            key = new Tuple<string, string>(repeatInputVariable.GetVariableName(), repeatInputVariable.DefaultProperty());
+            if (!inputVariableVistorMap.Keys.Contains(key))
+            {
+                aliasName = this.GenerateKey();
+                value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                inputVariableVistorMap[key] = value;
+
+                firstSelectColumn = repeatInputVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                secondSelectColumn = repeatPivotVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+            }
+            foreach (string property in repeatInputVariable.ProjectedProperties)
+            {
+                key = new Tuple<string, string>(repeatInputVariable.GetVariableName(), property);
+                if (!inputVariableVistorMap.Keys.Contains(key))
+                {
+                    aliasName = this.GenerateKey();
+                    value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                    inputVariableVistorMap[key] = value;
+
+                    firstSelectColumn = repeatInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                    secondSelectColumn = repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+                }
+            }
+
+            if (this.RepeatCondition.TerminationContext != null && this.RepeatCondition.TerminationContext.VariableList.Count > 0)
+            {
+                GremlinVariable untilInputVariable = this.RepeatCondition.TerminationContext.VariableList.First();
+
+                // untilInputVariable.DefaultProperty()
+                key = new Tuple<string, string>(untilInputVariable.GetVariableName(), untilInputVariable.DefaultProperty());
+                if (!inputVariableVistorMap.Keys.Contains(key))
+                {
+                    aliasName = this.GenerateKey();
+                    value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                    inputVariableVistorMap[key] = value;
+
+                    firstSelectColumn =
+                        untilInputVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                    secondSelectColumn =
+                        repeatPivotVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+                }
+                
+                foreach (string property in untilInputVariable.ProjectedProperties)
+                {
+                    key = new Tuple<string, string>(untilInputVariable.GetVariableName(), property);
+                    if (!inputVariableVistorMap.Keys.Contains(key))
+                    {
+                        aliasName = this.GenerateKey();
+                        value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                        inputVariableVistorMap[key] = value;
+
+                        firstSelectColumn = untilInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                        secondSelectColumn = repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                        firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                        secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+                    }                    
+                }
+            }
+
+            if (this.RepeatCondition.EmitContext != null && this.RepeatCondition.EmitContext.VariableList.Count > 0)
+            {
+                GremlinVariable emitInputVariable = this.RepeatCondition.EmitContext.VariableList.First();
+
+                // emitInputVariable.DefaultProperty()
+                key = new Tuple<string, string>(emitInputVariable.GetVariableName(), emitInputVariable.DefaultProperty());
+                if (!inputVariableVistorMap.Keys.Contains(key))
+                {
+                    aliasName = this.GenerateKey();
+                    value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                    inputVariableVistorMap[key] = value;
+
+                    firstSelectColumn = 
+                        emitInputVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                    secondSelectColumn = 
+                        repeatPivotVariable.DefaultProjection().ToScalarExpression() as WColumnReferenceExpression;
+                    firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                    secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+                }
+
+                foreach (string property in emitInputVariable.ProjectedProperties)
+                {
+                    key = new Tuple<string, string>(emitInputVariable.GetVariableName(), property);
+                    if (!inputVariableVistorMap.Keys.Contains(key))
+                    {
+                        aliasName = this.GenerateKey();
+                        value = new Tuple<string, string>(GremlinKeyword.RepeatInitalTableName, aliasName);
+                        inputVariableVistorMap[key] = value;
+
+                        firstSelectColumn =
+                            emitInputVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                        secondSelectColumn =
+                            repeatPivotVariable.GetVariableProperty(property).ToScalarExpression() as WColumnReferenceExpression;
+                        firstSelectList.Add(SqlUtil.GetSelectScalarExpr(firstSelectColumn, aliasName));
+                        secondSelectList.Add(SqlUtil.GetSelectScalarExpr(secondSelectColumn, aliasName));
+                    }
+                }
             }
 
             WSelectQueryBlock firstQueryExpr = new WSelectQueryBlock();

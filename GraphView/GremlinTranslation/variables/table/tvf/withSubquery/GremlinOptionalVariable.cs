@@ -21,7 +21,7 @@ namespace GraphView
             this.InputVariable = new GremlinContextVariable(inputVariable);
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
             return this.OptionalContext.ContextLocalPath.PopulateStepProperty(property, label);
         }
@@ -44,14 +44,17 @@ namespace GraphView
                 this.OptionalContext.Populate(property, null);
                 return true;
             }
-            bool populateSuccess = false;
-            populateSuccess |= this.InputVariable.Populate(property, label);
-            populateSuccess |= this.OptionalContext.Populate(property, label);
-            if (populateSuccess)
+            else
             {
-                base.Populate(property, label);
+                bool populateSuccess = false;
+                populateSuccess |= this.InputVariable.Populate(property, label);
+                populateSuccess |= this.OptionalContext.Populate(property, label);
+                if (populateSuccess)
+                {
+                    base.Populate(property, label);
+                }
+                return populateSuccess;
             }
-            return populateSuccess;
         }
 
         internal override WScalarExpression ToStepScalarExpr()

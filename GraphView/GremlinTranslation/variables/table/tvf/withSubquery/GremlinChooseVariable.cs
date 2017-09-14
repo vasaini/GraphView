@@ -8,7 +8,7 @@ namespace GraphView
 {
     internal class GremlinChooseVariable : GremlinTableVariable
     {
-        public GremlinToSqlContext ProjectContext { get; set; }
+        public GremlinToSqlContext PredicateContext { get; set; }
         public GremlinToSqlContext TrueChoiceContext { get; set; }
         public GremlinToSqlContext FalseChocieContext { get; set; }
         public GremlinToSqlContext ChoiceContext { get; set; }
@@ -17,7 +17,7 @@ namespace GraphView
         public GremlinChooseVariable(GremlinToSqlContext predicateContext, GremlinToSqlContext trueChoiceContext, GremlinToSqlContext falseChocieContext)
             : base(GremlinVariableType.Table)
         {
-            this.ProjectContext = predicateContext;
+            this.PredicateContext = predicateContext;
             this.TrueChoiceContext = trueChoiceContext;
             this.FalseChocieContext = falseChocieContext;
             this.Options = new Dictionary<object, GremlinToSqlContext>();
@@ -43,7 +43,7 @@ namespace GraphView
                 }
                 populateSuccess = true;
             }
-            else if (this.ProjectContext != null)
+            else if (this.PredicateContext != null)
             {
                 if (this.TrueChoiceContext.Populate(property, label))
                 {
@@ -73,9 +73,9 @@ namespace GraphView
         internal override List<GremlinVariable> FetchAllVars()
         {
             List<GremlinVariable> variableList = new List<GremlinVariable>() { this };
-            if (this.ProjectContext != null)
+            if (this.PredicateContext != null)
             {
-                variableList.AddRange(this.ProjectContext.FetchAllVars());
+                variableList.AddRange(this.PredicateContext.FetchAllVars());
                 variableList.AddRange(this.TrueChoiceContext.FetchAllVars());
                 variableList.AddRange(this.FalseChocieContext.FetchAllVars());
             }
@@ -93,9 +93,9 @@ namespace GraphView
         internal override List<GremlinTableVariable> FetchAllTableVars()
         {
             List<GremlinTableVariable> variableList = new List<GremlinTableVariable> { this };
-            if (this.ProjectContext != null)
+            if (this.PredicateContext != null)
             {
-                variableList.AddRange(this.ProjectContext.FetchAllTableVars());
+                variableList.AddRange(this.PredicateContext.FetchAllTableVars());
                 variableList.AddRange(this.TrueChoiceContext.FetchAllTableVars());
                 variableList.AddRange(this.FalseChocieContext.FetchAllTableVars());
             }
@@ -110,7 +110,7 @@ namespace GraphView
             return variableList;
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
             bool populateSuccess = false;
             if (base.Populate(property, label))
@@ -123,7 +123,7 @@ namespace GraphView
                 }
                 populateSuccess = true;
             }
-            else if (this.ProjectContext != null)
+            else if (this.PredicateContext != null)
             {
                 populateSuccess |= this.TrueChoiceContext.ContextLocalPath.PopulateStepProperty(property, label);
                 populateSuccess |= this.FalseChocieContext.ContextLocalPath.PopulateStepProperty(property, label);
@@ -145,7 +145,7 @@ namespace GraphView
                 return;
             }
             ProjectedProperties.Add(GremlinKeyword.Path);
-            if (this.ProjectContext != null)
+            if (this.PredicateContext != null)
             {
                 this.TrueChoiceContext.PopulateLocalPath();
                 this.FalseChocieContext.PopulateLocalPath();
@@ -167,13 +167,16 @@ namespace GraphView
         public override WTableReference ToTableReference()
         {
             List<WScalarExpression> parameters = new List<WScalarExpression>();
+            List<WSelectQueryBlock> selectQueryBlocks = new List<WSelectQueryBlock>();
             WTableReference tableReference;
 
-            if (this.ProjectContext != null)
+            if (this.PredicateContext != null)
             {
-                parameters.Add(SqlUtil.GetScalarSubquery(this.ProjectContext.ToSelectQueryBlock()));
-                parameters.Add(SqlUtil.GetScalarSubquery(this.TrueChoiceContext.ToSelectQueryBlock()));
-                parameters.Add(SqlUtil.GetScalarSubquery(this.FalseChocieContext.ToSelectQueryBlock()));
+                parameters.Add(SqlUtil.GetScalarSubquery(this.PredicateContext.ToSelectQueryBlock()));
+                selectQueryBlocks.Add(this.TrueChoiceContext.ToSelectQueryBlock());
+                selectQueryBlocks.Add(this.FalseChocieContext.ToSelectQueryBlock());
+                this.AlignSelectQueryBlocks(selectQueryBlocks);
+                parameters.AddRange(selectQueryBlocks.Select(SqlUtil.GetScalarSubquery));
                 tableReference = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Choose, parameters, GetVariableName());
             }
             else
@@ -190,6 +193,7 @@ namespace GraphView
                         parameters.Add(SqlUtil.GetValueExpr(option.Key));
                     }
                     parameters.Add(SqlUtil.GetScalarSubquery(option.Value.ToSelectQueryBlock()));
+
                 }
                 tableReference = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.ChooseWithOptions, parameters, GetVariableName());
             }

@@ -18,13 +18,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.LocalContext.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return LocalContext.Populate(property, null);
+            }
+            else if (this.LocalContext.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {
@@ -32,7 +32,7 @@ namespace GraphView
             }
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
             return this.LocalContext.ContextLocalPath.PopulateStepProperty(property, label);
         }

@@ -19,13 +19,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.InputVariable.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return this.InputVariable.Populate(property, null);
+            }
+            else if (this.InputVariable.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {
@@ -45,6 +45,7 @@ namespace GraphView
             List<WScalarExpression> parameters = new List<WScalarExpression>();
             parameters.Add(this.InputVariable.DefaultProjection().ToScalarExpression());
             parameters.Add(SqlUtil.GetValueExpr(this.Column == GremlinKeyword.Column.Keys ? "Keys" : "Values"));
+            parameters.Add(SqlUtil.GetValueExpr(this.DefaultProperty()));
             parameters.AddRange(this.ProjectedProperties.Select(SqlUtil.GetValueExpr));
             var tableRef = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.SelectColumn, parameters, GetVariableName());
             return SqlUtil.GetCrossApplyTableReference(tableRef);

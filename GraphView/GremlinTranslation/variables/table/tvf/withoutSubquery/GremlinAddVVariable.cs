@@ -28,7 +28,7 @@ namespace GraphView
             this.PropertyFromAddVParameters = new Dictionary<string, List<GremlinProperty>>();
             foreach (var property in vertexProperties)
             {
-                ProjectedProperties.Add(property.Key);
+                this.ProjectedProperties.Add(property.Key);
                 if (this.PropertyFromAddVParameters.ContainsKey(property.Key))
                 {
                     this.PropertyFromAddVParameters[property.Key].Add(property);
@@ -42,7 +42,7 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (ProjectedProperties.Contains(property))
+            if (this.ProjectedProperties.Contains(property))
             {
                 return true;
             }

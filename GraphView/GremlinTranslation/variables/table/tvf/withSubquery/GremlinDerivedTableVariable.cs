@@ -18,13 +18,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.SubqueryContext.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return this.SubqueryContext.Populate(property, null);
+            }
+            else if (this.SubqueryContext.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {
@@ -231,6 +231,7 @@ namespace GraphView
             
             List<WValueExpression> columnListExpr = new List<WValueExpression>();
 
+            columnListExpr.Add(SqlUtil.GetValueExpr(this.SubqueryContext.PivotVariable.DefaultProperty()));
             columnListExpr.AddRange(this.ProjectedProperties.Select(SqlUtil.GetValueExpr));
             
             List<WScalarExpression> capParameters = new List<WScalarExpression>();

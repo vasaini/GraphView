@@ -49,15 +49,17 @@ namespace GraphView
                 this.ProjectByContext.Populate(property, null);
                 return true;
             }
-
-            bool populateSuccess = false;
-            populateSuccess |= this.GroupByContext.Populate(property, label);
-            populateSuccess |= this.ProjectByContext.Populate(property, label);
-            if (populateSuccess)
+            else
             {
-                base.Populate(property, null);
+                bool populateSuccess = false;
+                populateSuccess |= this.GroupByContext.Populate(property, label);
+                populateSuccess |= this.ProjectByContext.Populate(property, label);
+                if (populateSuccess)
+                {
+                    base.Populate(property, null);
+                }
+                return populateSuccess;
             }
-            return populateSuccess;
         }
 
         public override WTableReference ToTableReference()

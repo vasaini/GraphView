@@ -33,13 +33,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.RealVariable.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return this.RealVariable.Populate(property, null);
+            }
+            else if (this.RealVariable.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {
@@ -64,7 +64,7 @@ namespace GraphView
             //}
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
             if (this.RealVariable.PopulateStepProperty(property, label))
             {

@@ -42,25 +42,13 @@ namespace GraphView
             }
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
-            if (base.Populate(property, label))
+            foreach (var context in this.UnionContextList)
             {
-                foreach (var context in this.UnionContextList)
-                {
-                    context.ContextLocalPath.PopulateStepProperty(property, null);
-                }
-                return true;
+                context.ContextLocalPath.PopulateStepProperty(property, label);
             }
-            else
-            {
-                bool populateSuccess = false;
-                foreach (var context in this.UnionContextList)
-                {
-                    populateSuccess |= context.ContextLocalPath.PopulateStepProperty(property, label);
-                }
-                return populateSuccess;
-            }
+            return false;
         }
 
         internal override void PopulateLocalPath()
@@ -110,7 +98,10 @@ namespace GraphView
             }
             else
             {
-                parameters.AddRange(this.UnionContextList.Select(context => SqlUtil.GetScalarSubquery(context.ToSelectQueryBlock())));
+                List<WSelectQueryBlock> selectQueryBlocks = new List<WSelectQueryBlock>();
+                selectQueryBlocks.AddRange(this.UnionContextList.Select(context => context.ToSelectQueryBlock()));
+                this.AlignSelectQueryBlocks(selectQueryBlocks);
+                parameters.AddRange(selectQueryBlocks.Select(SqlUtil.GetScalarSubquery));
             }
 
             var tableRef = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Union, parameters, GetVariableName());

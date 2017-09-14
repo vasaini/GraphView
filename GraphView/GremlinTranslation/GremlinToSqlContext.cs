@@ -239,34 +239,31 @@ namespace GraphView
                 return selectElements;
             }
 
-            foreach (var projectProperty in this.ProjectedProperties)
-            {
-                WSelectScalarExpression selectScalarExpr;
-                if (projectProperty == GremlinKeyword.Path)
-                {
-                    selectScalarExpr = SqlUtil.GetSelectScalarExpr(this.ContextLocalPath.DefaultProjection().ToScalarExpression(), GremlinKeyword.Path);
-                }
-                else if (projectProperty == GremlinKeyword.TableDefaultColumnName)
-                {
-                    GremlinVariableProperty defaultProjection = this.PivotVariable.DefaultProjection();
-                    selectScalarExpr = SqlUtil.GetSelectScalarExpr(defaultProjection.ToScalarExpression(), GremlinKeyword.TableDefaultColumnName);
-                }
-                else if (this.PivotVariable.ProjectedProperties.Contains(projectProperty))
-                {
-                    WScalarExpression columnExpr = this.PivotVariable.GetVariableProperty(projectProperty).ToScalarExpression();
-                    selectScalarExpr = SqlUtil.GetSelectScalarExpr(columnExpr, projectProperty);
-                }
-                else
-                {
-                    selectScalarExpr = SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), projectProperty);
-                }
-                selectElements.Add(selectScalarExpr);
-            }
+            GremlinVariableProperty defaultProjection = this.PivotVariable.DefaultProjection();
+            selectElements.Add(SqlUtil.GetSelectScalarExpr(defaultProjection.ToScalarExpression(), this.PivotVariable.DefaultProperty()));
 
-            if (selectElements.Count == 0)
+            foreach (var property in this.ProjectedProperties)
             {
-                GremlinVariableProperty defaultProjection = this.PivotVariable.DefaultProjection();
-                selectElements.Add(SqlUtil.GetSelectScalarExpr(defaultProjection.ToScalarExpression(), GremlinKeyword.TableDefaultColumnName));
+                //WSelectScalarExpression selectScalarExpr;
+                //if (projectProperty == GremlinKeyword.Path)
+                //{
+                //    selectScalarExpr = SqlUtil.GetSelectScalarExpr(this.ContextLocalPath.DefaultProjection().ToScalarExpression(), GremlinKeyword.Path);
+                //}
+                //else if (this.PivotVariable.ProjectedProperties.Contains(projectProperty))
+                //{
+                //    WScalarExpression columnExpr = this.PivotVariable.GetVariableProperty(projectProperty).ToScalarExpression();
+                //    selectScalarExpr = SqlUtil.GetSelectScalarExpr(columnExpr, projectProperty);
+                //}
+                //else
+                //{
+                //    selectScalarExpr = SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), projectProperty);
+                //}
+                //selectElements.Add(selectScalarExpr);
+
+                WScalarExpression selectScalarExpr = this.PivotVariable.ProjectedProperties.Contains(property)
+                    ? this.PivotVariable.GetVariableProperty(property).ToScalarExpression()
+                    : SqlUtil.GetValueExpr(null);
+                selectElements.Add(SqlUtil.GetSelectScalarExpr(selectScalarExpr, property));
             }
 
             return selectElements;

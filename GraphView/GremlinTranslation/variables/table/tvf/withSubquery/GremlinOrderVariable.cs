@@ -43,13 +43,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.InputVariable.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return this.InputVariable.Populate(property, label);
+            }
+            else if (this.InputVariable.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {

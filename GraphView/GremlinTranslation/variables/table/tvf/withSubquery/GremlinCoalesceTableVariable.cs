@@ -53,8 +53,10 @@ namespace GraphView
         public override  WTableReference ToTableReference()
         {
             List<WScalarExpression> parameters = new List<WScalarExpression>();
-            parameters.AddRange(
-                this.CoalesceContextList.Select(context => SqlUtil.GetScalarSubquery(context.ToSelectQueryBlock())));
+            List<WSelectQueryBlock> selectQueryBlocks = new List<WSelectQueryBlock>();
+            selectQueryBlocks.AddRange(this.CoalesceContextList.Select(context => context.ToSelectQueryBlock()));
+            this.AlignSelectQueryBlocks(selectQueryBlocks);
+            parameters.AddRange(selectQueryBlocks.Select(SqlUtil.GetScalarSubquery));
 
             var tableRef = SqlUtil.GetFunctionTableReference(GremlinKeyword.func.Coalesce, parameters, GetVariableName());
             return SqlUtil.GetCrossApplyTableReference(tableRef);

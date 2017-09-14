@@ -58,39 +58,27 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (base.Populate(property, label))
+            if (label == null || this.Labels.Contains(label))
             {
-                this.InputVariable.Populate(property, null);
-                this.PathVariable.Populate(property, null);
-                foreach (var sideEffectVariable in this.SideEffectVariables)
+                foreach (string selectKey in this.SelectKeys)
                 {
-                    sideEffectVariable.Populate(property, null);
+                    this.InputVariable.Populate(property, selectKey);
+                    this.PathVariable.PopulateStepProperty(property, selectKey);
+                    foreach (var sideEffectVariable in this.SideEffectVariables)
+                    {
+                        sideEffectVariable.Populate(property, selectKey);
+                    }
+                    foreach (var context in this.ByContexts)
+                    {
+                        context.Populate(property, selectKey);
+                    }
                 }
-                foreach (var context in this.ByContexts)
+                if (SelectKeys.Count() == 1)
                 {
-                    context.Populate(property, null);
+                    return base.Populate(property);
                 }
-                return true;
             }
-            else
-            {
-                bool populateSuccess = false;
-                populateSuccess |= this.InputVariable.Populate(property, label);
-                populateSuccess |= this.PathVariable.Populate(property, label);
-                foreach (var sideEffectVariable in this.SideEffectVariables)
-                {
-                    populateSuccess |= sideEffectVariable.Populate(property, label);
-                }
-                foreach (var context in this.ByContexts)
-                {
-                    populateSuccess |= context.Populate(property, label);
-                }
-                if (populateSuccess)
-                {
-                    base.Populate(property, null);
-                }
-                return populateSuccess;
-            }
+            return false;
         }
 
         public override WTableReference ToTableReference()

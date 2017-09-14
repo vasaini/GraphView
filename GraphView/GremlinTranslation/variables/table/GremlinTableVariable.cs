@@ -37,13 +37,13 @@ namespace GraphView
                         return false;
                     }
                     break;
-                //case GremlinVariableType.Scalar:
-                //case GremlinVariableType.Property:
-                //    if (property != GremlinKeyword.TableDefaultColumnName)
-                //    {
-                //        return false;
-                //    }
-                //    break;
+                case GremlinVariableType.Scalar:
+                case GremlinVariableType.Property:
+                    if (property != GremlinKeyword.TableDefaultColumnName)
+                    {
+                        return false;
+                    }
+                    break;
             }
             return base.Populate(property, label);
         }

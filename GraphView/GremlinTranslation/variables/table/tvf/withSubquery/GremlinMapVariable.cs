@@ -18,13 +18,13 @@ namespace GraphView
 
         internal override bool Populate(string property, string label = null)
         {
-            if (this.MapContext.Populate(property, label))
-            {
-                return base.Populate(property, null);
-            }
-            else if (base.Populate(property, label))
+            if (base.Populate(property, label))
             {
                 return MapContext.Populate(property, null);
+            }
+            else if (this.MapContext.Populate(property, label))
+            {
+                return base.Populate(property, null);
             }
             else
             {

@@ -35,6 +35,34 @@ namespace GraphView
             this.NeedFilter = false;
         }
 
+        internal virtual void AlignSelectQueryBlocks(List<WSelectQueryBlock> selectQueryBlocks)
+        {
+            this.ProjectedProperties.Sort();
+            WSelectElement value;
+            for (int index = 0; index < selectQueryBlocks.Count; index++)
+            {
+                Dictionary<string, WSelectElement> projectionMap = new Dictionary<string, WSelectElement>();
+
+                // defaultProjection
+                value = selectQueryBlocks[index].SelectElements[0].Copy();
+
+                foreach (WSelectElement selectElement in selectQueryBlocks[index].SelectElements)
+                {
+                    projectionMap[(selectElement as WSelectScalarExpression).ColumnName] = selectElement;
+                }
+                selectQueryBlocks[index].SelectElements.Clear();
+
+                // defaultProjection
+                selectQueryBlocks[index].SelectElements.Add(SqlUtil.GetSelectScalarExpr((value as WSelectScalarExpression).SelectExpr, this.DefaultProperty()));
+                foreach (string property in this.ProjectedProperties)
+                {
+                    selectQueryBlocks[index].SelectElements.Add(
+                        projectionMap.TryGetValue(property, out value)
+                        ? value : SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), property));
+                }
+            }
+        }
+
         internal virtual GremlinVariableType GetVariableType()
         {
             throw new NotImplementedException();
@@ -62,7 +90,7 @@ namespace GraphView
             {
                 return false;
             }
-    }
+        }
 
         /// <summary>
         /// This function is used for populate local path in a subquery,
@@ -82,7 +110,7 @@ namespace GraphView
         /// These variables are: Local/Optional/Union/Choose/Repeat.
         /// Note: Although Coalesce/FlatMap/Map/Project have subquery, these steps are treated as one step, so we needn't override this function
         /// </summary>
-        internal virtual bool PopulateStepProperty(string property, string label)
+        internal virtual bool PopulateStepProperty(string property, string label = null)
         {
             return this.Populate(property, label);
         }
@@ -160,10 +188,7 @@ namespace GraphView
         /// <returns></returns>
         internal virtual List<GremlinVariable> FetchAllVars()
         {
-            return new List<GremlinVariable>
-            {
-                this
-            };
+            return new List<GremlinVariable> { this };
         }
 
         internal virtual GremlinVariableProperty DefaultProjection()

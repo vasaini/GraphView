@@ -118,22 +118,16 @@ namespace GraphView
             }
         }
 
-        internal override bool PopulateStepProperty(string property, string label)
+        internal override bool PopulateStepProperty(string property, string label = null)
         {
-            bool populateSuccess = false;
             foreach (var step in this.GetStepList())
             {
-                if (step == this)
+                if (step != this)
                 {
-                    continue;
+                    step.PopulateStepProperty(property, label);
                 }
-                populateSuccess |= step.PopulateStepProperty(property, label);
             }
-            if (populateSuccess)
-            {
-                base.Populate(property, label);
-            }
-            return populateSuccess;
+            return false;
         }
 
         public List<GremlinVariable> GetStepList()
