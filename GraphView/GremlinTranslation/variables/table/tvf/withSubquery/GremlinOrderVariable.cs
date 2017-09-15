@@ -60,37 +60,37 @@ namespace GraphView
         public override WTableReference ToTableReference()
         {
             List<WScalarExpression> parameters = new List<WScalarExpression>();
-
-            var tableRef = this.Scope == GremlinKeyword.Scope.Global
-              ? SqlUtil.GetFunctionTableReference(GremlinKeyword.func.OrderGlobal, parameters, GetVariableName())
-              : SqlUtil.GetFunctionTableReference(GremlinKeyword.func.OrderLocal, parameters, GetVariableName());
-
-            var wOrderTableReference = tableRef as WOrderTableReference;
-            if (wOrderTableReference != null)
-                wOrderTableReference.OrderParameters = new List<Tuple<WScalarExpression, IComparer>>();
+            List<Tuple<WScalarExpression, IComparer>> orderParameters = new List<Tuple<WScalarExpression, IComparer>>();
 
             if (this.Scope == GremlinKeyword.Scope.Local)
             {
-                ((WOrderLocalTableReference)tableRef).Parameters.Add(this.InputVariable.DefaultProjection().ToScalarExpression());
-            }
-
-            foreach (var pair in this.ByModulatingList)
-            {
-                WScalarExpression scalarExpr = SqlUtil.GetScalarSubquery(pair.Item1.ToSelectQueryBlock());
-
-                var orderTableReference = tableRef as WOrderTableReference;
-                orderTableReference?.OrderParameters.Add(new Tuple<WScalarExpression, IComparer>(scalarExpr, pair.Item2));
-                orderTableReference?.Parameters.Add(scalarExpr);
-            }
-
-            if (this.Scope == GremlinKeyword.Scope.Local)
-            {
-                foreach (var property in ProjectedProperties)
+                parameters.Add(this.InputVariable.DefaultProjection().ToScalarExpression());
+                foreach (var pair in ByModulatingList)
                 {
-                    wOrderTableReference.Parameters.Add(SqlUtil.GetValueExpr(property));
+                    WScalarExpression scalarExpr = SqlUtil.GetScalarSubquery(pair.Item1.ToSelectQueryBlock());
+                    orderParameters.Add(new Tuple<WScalarExpression, IComparer>(scalarExpr, pair.Item2));
+                    parameters.Add(scalarExpr);
+                }
+                parameters.Add(SqlUtil.GetValueExpr(this.DefaultProperty()));
+                foreach (var property in this.ProjectedProperties)
+                {
+                    parameters.Add(SqlUtil.GetValueExpr(property));
+                }
+            }
+            else
+            {
+                foreach (var pair in ByModulatingList)
+                {
+                    WScalarExpression scalarExpr = SqlUtil.GetScalarSubquery(pair.Item1.ToSelectQueryBlock());
+                    orderParameters.Add(new Tuple<WScalarExpression, IComparer>(scalarExpr, pair.Item2));
+                    parameters.Add(scalarExpr);
                 }
             }
 
+            var tableRef = Scope == GremlinKeyword.Scope.Global
+                ? SqlUtil.GetFunctionTableReference(GremlinKeyword.func.OrderGlobal, parameters, GetVariableName())
+                : SqlUtil.GetFunctionTableReference(GremlinKeyword.func.OrderLocal, parameters, GetVariableName());
+            ((WOrderTableReference) tableRef).OrderParameters = orderParameters;
             return SqlUtil.GetCrossApplyTableReference(tableRef);
         }
     }

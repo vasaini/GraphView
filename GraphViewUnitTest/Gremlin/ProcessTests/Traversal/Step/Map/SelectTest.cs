@@ -351,6 +351,7 @@ namespace GraphViewUnitTest.Gremlin.ProcessTests.Traversal.Step.Map
                                                         GraphTraversal.__().Select("a"),
                                                         GraphTraversal.__().Select("b"));
 
+
                 var results = traversal.Next();
                 dynamic dynamicResult = JsonConvert.DeserializeObject<dynamic>(results.FirstOrDefault());
 

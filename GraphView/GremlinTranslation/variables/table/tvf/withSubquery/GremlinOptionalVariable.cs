@@ -81,27 +81,34 @@ namespace GraphView
         {
             WSelectQueryBlock firstQueryExpr = new WSelectQueryBlock();
 
-            foreach (var projectProperty in ProjectedProperties)
-            {
-                if (projectProperty == GremlinKeyword.TableDefaultColumnName)
-                {
-                    firstQueryExpr.SelectElements.Add(SqlUtil.GetSelectScalarExpr(this.InputVariable.DefaultProjection().ToScalarExpression(),
-                        GremlinKeyword.TableDefaultColumnName));
-                }
-                else if (this.InputVariable.RealVariable.ProjectedProperties.Contains(projectProperty))
-                {
-                    firstQueryExpr.SelectElements.Add(
-                        SqlUtil.GetSelectScalarExpr(
-                            this.InputVariable.RealVariable.GetVariableProperty(projectProperty).ToScalarExpression(), projectProperty));
-                }
-                else
-                {
-                    firstQueryExpr.SelectElements.Add(
-                        SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), projectProperty));
-                }
-            }
+            firstQueryExpr.SelectElements.Add(SqlUtil.GetSelectScalarExpr(this.InputVariable.DefaultProjection().ToScalarExpression(), this.DefaultProperty()));
+            //foreach (var projectProperty in this.ProjectedProperties)
+            //{
+            //    if (projectProperty == GremlinKeyword.TableDefaultColumnName)
+            //    {
+            //        firstQueryExpr.SelectElements.Add(SqlUtil.GetSelectScalarExpr(this.InputVariable.DefaultProjection().ToScalarExpression(),
+            //            GremlinKeyword.TableDefaultColumnName));
+            //    }
+            //    else if (this.InputVariable.RealVariable.ProjectedProperties.Contains(projectProperty))
+            //    {
+            //        firstQueryExpr.SelectElements.Add(
+            //            SqlUtil.GetSelectScalarExpr(
+            //                this.InputVariable.RealVariable.GetVariableProperty(projectProperty).ToScalarExpression(), projectProperty));
+            //    }
+            //    else
+            //    {
+            //        firstQueryExpr.SelectElements.Add(
+            //            SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), projectProperty));
+            //    }
+            //}
 
             WSelectQueryBlock secondQueryExpr = this.OptionalContext.ToSelectQueryBlock();
+
+            List<WSelectQueryBlock> selectQueryBlocks = new List<WSelectQueryBlock>();
+            selectQueryBlocks.Add(firstQueryExpr);
+            selectQueryBlocks.Add(secondQueryExpr);
+
+            this.AlignSelectQueryBlocks(selectQueryBlocks);
 
             var WBinaryQueryExpression = SqlUtil.GetBinaryQueryExpr(firstQueryExpr, secondQueryExpr);
 

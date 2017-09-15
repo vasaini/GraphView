@@ -259,10 +259,17 @@ namespace GraphView
                 //    selectScalarExpr = SqlUtil.GetSelectScalarExpr(SqlUtil.GetValueExpr(null), projectProperty);
                 //}
                 //selectElements.Add(selectScalarExpr);
-
-                WScalarExpression selectScalarExpr = this.PivotVariable.ProjectedProperties.Contains(property)
-                    ? this.PivotVariable.GetVariableProperty(property).ToScalarExpression()
-                    : SqlUtil.GetValueExpr(null);
+                WScalarExpression selectScalarExpr;
+                if (property == GremlinKeyword.Path)
+                {
+                    selectScalarExpr = ContextLocalPath.DefaultProjection().ToScalarExpression();
+                }
+                else
+                {
+                    selectScalarExpr = this.PivotVariable.ProjectedProperties.Contains(property)
+                        ? this.PivotVariable.GetVariableProperty(property).ToScalarExpression()
+                        : SqlUtil.GetValueExpr(null);
+                }
                 selectElements.Add(SqlUtil.GetSelectScalarExpr(selectScalarExpr, property));
             }
 
